@@ -56,9 +56,6 @@ router.get('/:id', tradeController.getTradeById);
  *           schema:
  *             type: object
  *             properties:
- *               user:
- *                 type: string
- *                 example: "glen"
  *               stockSymbol:
  *                 type: string
  *                 example: "aapl"
@@ -104,9 +101,6 @@ router.post('/', validateRequest(tradeEntrySchema), tradeController.createTrade)
  *           schema:
  *             type: object
  *             properties:
- *               user:
- *                 type: string
- *                 example: "glen"
  *               stockSymbol:
  *                 type: string
  *                 example: "aapl"

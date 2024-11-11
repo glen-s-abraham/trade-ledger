@@ -2,9 +2,6 @@
 const Joi = require('joi');
 
 const tradeEntrySchema = Joi.object({
-  user: Joi.string().required().messages({
-    'string.empty': 'User is required',
-  }),
   stockSymbol: Joi.string().required().messages({
     'string.empty': 'Stock symbol is required',
   }),

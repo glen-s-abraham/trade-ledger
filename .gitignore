@@ -9,6 +9,8 @@
 **/.env.production
 **/.env.test
 **/.cache
+**/logs
+**/.env
 
 # API-specific (t-ledger-api)
 t-ledger-api/logs/

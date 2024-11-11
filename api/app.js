@@ -3,8 +3,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const connectDB = require('./config/db');
 const tradeRoutes = require('./routes/trades');
+const authRoutes = require('./routes/auth');
 const setupSwagger = require('./config/swagger');
 const logger = require('./config/logger');
+const passport = require('passport');
+require('./config/passport');
+
 
 const app = express();
 
@@ -16,11 +20,14 @@ connectDB()
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use(passport.initialize());
+
 // Swagger Documentation
 setupSwagger(app);
 
 // Routes
-app.use('/api/trades', tradeRoutes);
+app.use('/api/trades', passport.authenticate('jwt', { session: false }), tradeRoutes);
+app.use('/api/auth', authRoutes);
 
 // Error-handling middleware
 app.use((err, req, res, next) => {

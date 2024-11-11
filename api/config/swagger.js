@@ -1,5 +1,3 @@
-// config/swagger.js
-
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -17,8 +15,22 @@ const swaggerOptions = {
         description: 'Local server'
       }
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
-  apis: ['./routes/*.js'], // Pointing to route files for Swagger annotations
+  apis: ['./routes/*.js'], // Path to route files for Swagger annotations
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);

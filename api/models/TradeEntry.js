@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const tradeEntrySchema = new mongoose.Schema({
-    user: { type: String, required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },  // Reference to User model
     stockSymbol: { type: String, required: true },
     transactionType: { type: String, enum: ['Buy', 'Sell'], required: true },
     quantity: { type: Number, required: true },
