@@ -288,3 +288,244 @@ exports.getPnLReport = async (req, res) => {
         res.status(500).json({ error: 'Error generating P&L report' });
     }
 };
+
+// Calculate the total invested amount for the authenticated user
+exports.getTotalInvestedAmount = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Aggregate total invested amount from "Buy" trades only
+        const holdings = await TradeEntry.aggregate([
+            { $match: { user: userId } },
+            {
+                $group: {
+                    _id: "$stockSymbol",
+                    totalQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                "$quantity",
+                                { $multiply: ["$quantity", -1] } // Subtract quantity for "Sell" trades
+                            ]
+                        }
+                    },
+                    weightedPriceSum: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                { $multiply: ["$quantity", "$price"] },
+                                0 // Ignore price contribution for "Sell" trades
+                            ]
+                        }
+                    },
+                    totalBuyQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                "$quantity",
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    stockSymbol: "$_id",
+                    totalQuantity: 1,
+                    averagePurchasePrice: {
+                        $cond: {
+                            if: { $eq: ["$totalBuyQuantity", 0] },
+                            then: 0,
+                            else: { $divide: ["$weightedPriceSum", "$totalBuyQuantity"] }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        // Extract total invested amount or default to 0 if no data
+        const totalInvested = holdings.reduce((sum, holding) => {
+            return sum + (holding.averagePurchasePrice * holding.totalQuantity);
+        }, 0);
+
+        logger.info(`Calculated total invested amount for user ${userId}`);
+        res.status(200).json({ totalInvested });
+    } catch (error) {
+        logger.error('Error calculating total invested amount:', error);
+        res.status(500).json({ error: 'Error calculating total invested amount' });
+    }
+};
+
+// Calculate total P&L for the authenticated user
+exports.getTotalPnL = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Step 1: Aggregate holdings to get net quantity and average purchase price for each stock symbol
+        const holdings = await TradeEntry.aggregate([
+            { $match: { user: userId } },
+            {
+                $group: {
+                    _id: "$stockSymbol",
+                    totalQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                "$quantity",
+                                { $multiply: ["$quantity", -1] } // Subtract quantity for "Sell" trades
+                            ]
+                        }
+                    },
+                    weightedPriceSum: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                { $multiply: ["$quantity", "$price"] },
+                                0 // Ignore price contribution for "Sell" trades
+                            ]
+                        }
+                    },
+                    totalBuyQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                "$quantity",
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    stockSymbol: "$_id",
+                    totalQuantity: 1,
+                    averagePurchasePrice: {
+                        $cond: {
+                            if: { $eq: ["$totalBuyQuantity", 0] },
+                            then: 0,
+                            else: { $divide: ["$weightedPriceSum", "$totalBuyQuantity"] }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        // Step 2: Calculate total P&L by fetching the current market price for each stock symbol
+        let totalPnL = 0;
+
+        for (const holding of holdings) {
+            const { stockSymbol, totalQuantity, averagePurchasePrice } = holding;
+
+            // Skip symbols with zero quantity
+            if (totalQuantity === 0) continue;
+
+            // Fetch current market price using the utility function
+            const currentMarketPrice = await getStockPrice(stockSymbol);
+
+            // Calculate P&L for this stock
+            const pnl = (currentMarketPrice - averagePurchasePrice) * totalQuantity;
+
+            // Add this P&L to the total P&L
+            totalPnL += pnl;
+        }
+
+        logger.info(`Calculated total P&L for user ${userId}`);
+        res.status(200).json({ totalPnL });
+    } catch (error) {
+        logger.error('Error calculating total P&L:', error);
+        res.status(500).json({ error: 'Error calculating total P&L' });
+    }
+};
+
+
+
+// Calculate total percentage change for the current investment
+exports.getTotalPercentageChange = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Step 1: Aggregate holdings to get net quantity and average purchase price for each stock symbol
+        const holdings = await TradeEntry.aggregate([
+            { $match: { user: userId } },
+            {
+                $group: {
+                    _id: "$stockSymbol",
+                    totalQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                "$quantity",
+                                { $multiply: ["$quantity", -1] } // Subtract quantity for "Sell" trades
+                            ]
+                        }
+                    },
+                    weightedPriceSum: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                { $multiply: ["$quantity", "$price"] },
+                                0 // Ignore price contribution for "Sell" trades
+                            ]
+                        }
+                    },
+                    totalBuyQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                "$quantity",
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    stockSymbol: "$_id",
+                    totalQuantity: 1,
+                    averagePurchasePrice: {
+                        $cond: {
+                            if: { $eq: ["$totalBuyQuantity", 0] },
+                            then: 0,
+                            else: { $divide: ["$weightedPriceSum", "$totalBuyQuantity"] }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        // Step 2: Calculate total invested amount and current market value
+        let totalInvestedAmount = 0;
+        let currentMarketValue = 0;
+
+        for (const holding of holdings) {
+            const { stockSymbol, totalQuantity, averagePurchasePrice } = holding;
+
+            // Skip symbols with zero quantity
+            if (totalQuantity === 0) continue;
+
+            // Calculate invested amount for this stock
+            totalInvestedAmount += averagePurchasePrice * totalQuantity;
+
+            // Fetch current market price and calculate current value
+            const currentMarketPrice = await getStockPrice(stockSymbol);
+            currentMarketValue += currentMarketPrice * totalQuantity;
+        }
+
+        // Step 3: Calculate percentage change
+        const percentageChange = totalInvestedAmount > 0
+            ? ((currentMarketValue - totalInvestedAmount) / totalInvestedAmount) * 100
+            : 0;
+
+        logger.info(`Calculated total percentage change for user ${userId}`);
+        res.status(200).json({ totalInvestedAmount, currentMarketValue, percentageChange });
+    } catch (error) {
+        logger.error('Error calculating total percentage change:', error);
+        res.status(500).json({ error: 'Error calculating total percentage change' });
+    }
+};

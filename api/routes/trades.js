@@ -229,6 +229,103 @@ router.get('/current/holdings', tradeController.getCurrentHoldings);
 // Route for P&L report
 router.get('/current/pnl', tradeController.getPnLReport);
 
+/**
+ * @swagger
+ * /api/trades/current/invested:
+ *   get:
+ *     summary: Get the total invested amount for the authenticated user
+ *     description: Returns the total invested amount based on all "Buy" trades made by the user.
+ *     tags:
+ *       - Trades
+ *     security:
+ *       - bearerAuth: []  # Requires a JWT token
+ *     responses:
+ *       200:
+ *         description: Total invested amount
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalInvested:
+ *                   type: number
+ *                   description: Total amount invested in "Buy" trades
+ *                   example: 50000.75
+ *       500:
+ *         description: Internal server error
+ */
+
+// Route to get total invested amount
+router.get(
+    '/current/invested',
+    tradeController.getTotalInvestedAmount
+);
+
+/**
+ * @swagger
+ * /api/trades/current/total-pnl:
+ *   get:
+ *     summary: Get the total P&L for the user's holdings
+ *     description: Returns the total profit or loss (P&L) across all stocks the user is holding.
+ *     tags:
+ *       - Trades
+ *     security:
+ *       - bearerAuth: []  # Requires a JWT token
+ *     responses:
+ *       200:
+ *         description: Total P&L for the user's holdings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalPnL:
+ *                   type: number
+ *                   description: Total profit or loss for all holdings
+ *                   example: 5000.75
+ *       500:
+ *         description: Internal server error
+ */
+
+// Route to get total P&L
+router.get('/current/total-pnl', tradeController.getTotalPnL);
+
+/**
+ * @swagger
+ * /api/trades/current/total-percentage-change:
+ *   get:
+ *     summary: Get the total percentage change for the user's investment
+ *     description: Returns the total invested amount, current market value, and percentage change.
+ *     tags:
+ *       - Trades
+ *     security:
+ *       - bearerAuth: []  # Requires a JWT token
+ *     responses:
+ *       200:
+ *         description: Total percentage change for the user's investment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalInvestedAmount:
+ *                   type: number
+ *                   description: Total amount invested in "Buy" trades
+ *                   example: 50000.75
+ *                 currentMarketValue:
+ *                   type: number
+ *                   description: Current market value based on latest prices
+ *                   example: 55000.00
+ *                 percentageChange:
+ *                   type: number
+ *                   description: Percentage change between current market value and total invested amount
+ *                   example: 10.0
+ *       500:
+ *         description: Internal server error
+ */
+
+// Route to get total percentage change for the current investment
+router.get('/current/total-percentage-change', tradeController.getTotalPercentageChange);
 
 module.exports = router;
 
