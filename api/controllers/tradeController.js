@@ -2,6 +2,7 @@
 const TradeEntry = require('../models/TradeEntry');
 const logger = require('../config/logger');
 const { Schema } = require('mongoose');
+const { getStockPrice } = require('../config/yfinance');
 
 // Get all trade entries
 exports.getAllTrades = async (req, res) => {
@@ -194,3 +195,96 @@ exports.getCurrentHoldings = async (req, res) => {
         res.status(500).json({ error: 'Error generating stock report' });
     }
 }
+
+exports.getPnLReport = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Step 1: Aggregate holdings to get net quantity and average purchase price
+        const holdings = await TradeEntry.aggregate([
+            { $match: { user: userId } },
+            {
+                $group: {
+                    _id: "$stockSymbol",
+                    totalQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                "$quantity",
+                                { $multiply: ["$quantity", -1] }  // Subtract quantity for "Sell" trades
+                            ]
+                        }
+                    },
+                    weightedPriceSum: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                { $multiply: ["$quantity", "$price"] },
+                                0  // Ignore price contribution for "Sell" trades
+                            ]
+                        }
+                    },
+                    totalBuyQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$transactionType", "Buy"] },
+                                "$quantity",
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    stockSymbol: "$_id",
+                    totalQuantity: 1,
+                    averagePurchasePrice: {
+                        $cond: {
+                            if: { $eq: ["$totalBuyQuantity", 0] },
+                            then: 0,
+                            else: { $divide: ["$weightedPriceSum", "$totalBuyQuantity"] }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        // Step 2: Calculate P&L and percentage change by fetching the current market price for each stock symbol
+        const pnlReport = await Promise.all(
+            holdings.map(async (holding) => {
+                const { stockSymbol, totalQuantity, averagePurchasePrice } = holding;
+
+                // Skip symbols with zero quantity
+                if (totalQuantity === 0) return null;
+
+                // Fetch current market price using the utility function
+                const currentMarketPrice = await getStockPrice(stockSymbol);
+
+                // Calculate P&L
+                const pnl = (currentMarketPrice - averagePurchasePrice) * totalQuantity;
+
+                // Calculate P&L Percentage Change
+                const pnlPercentageChange = averagePurchasePrice > 0
+                    ? ((currentMarketPrice - averagePurchasePrice) / averagePurchasePrice) * 100
+                    : 0;
+
+                return {
+                    stockSymbol,
+                    totalQuantity,
+                    averagePurchasePrice,
+                    currentMarketPrice,
+                    pnl,
+                    pnlPercentageChange
+                };
+            })
+        );
+
+        // Filter out null entries (for stocks with zero quantity) and respond with P&L report
+        res.status(200).json(pnlReport.filter(entry => entry !== null));
+    } catch (error) {
+        logger.error('Error generating P&L report:', error);
+        res.status(500).json({ error: 'Error generating P&L report' });
+    }
+};

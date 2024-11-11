@@ -186,4 +186,49 @@ router.delete('/:id', tradeController.deleteTrade);
 
 router.get('/current/holdings', tradeController.getCurrentHoldings);
 
+/**
+ * @swagger
+ * /api/trades/current/pnl:
+ *   get:
+ *     summary: Get the profit and loss (P&L) report for the user's holdings
+ *     description: Returns the P&L report for each stock symbol the user holds, including current market price, total quantity, and average purchase price.
+ *     tags:
+ *       - Trades
+ *     security:
+ *       - bearerAuth: []  # Requires a JWT token
+ *     responses:
+ *       200:
+ *         description: P&L report for the user's holdings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   stockSymbol:
+ *                     type: string
+ *                     example: "AAPL"
+ *                   totalQuantity:
+ *                     type: number
+ *                     example: 30
+ *                   averagePurchasePrice:
+ *                     type: number
+ *                     example: 150.75
+ *                   currentMarketPrice:
+ *                     type: number
+ *                     example: 175.00
+ *                   pnl:
+ *                     type: number
+ *                     description: Profit or loss based on current market price and average purchase price
+ *                     example: 730.5
+ *       500:
+ *         description: Internal server error
+ */
+
+// Route for P&L report
+router.get('/current/pnl', tradeController.getPnLReport);
+
+
 module.exports = router;
+
