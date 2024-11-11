@@ -1,5 +1,6 @@
+// routes/trades.js
 const express = require('express');
-const TradeEntry = require('../models/TradeEntry');
+const tradeController = require('../controllers/tradeController');
 const validateRequest = require('../middlewares/validateRequest');
 const { tradeEntrySchema } = require('../schemas/tradeValidator');
 
@@ -16,36 +17,8 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Successfully retrieved list of trade entries
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   user:
- *                     type: string
- *                     example: "glen"
- *                   stockSymbol:
- *                     type: string
- *                     example: "AAPL"
- *                   transactionType:
- *                     type: string
- *                     example: "Buy"
- *                   quantity:
- *                     type: number
- *                     example: 10
- *                   price:
- *                     type: number
- *                     example: 150.00
- *                   tradeDate:
- *                     type: string
- *                     example: "2024-11-11"
  */
-router.get('/', async (req, res) => {
-    const trades = await TradeEntry.find();
-    res.status(200).json(trades);
-});
+router.get('/', tradeController.getAllTrades);
 
 /**
  * @swagger
@@ -67,15 +40,7 @@ router.get('/', async (req, res) => {
  *       404:
  *         description: Trade entry not found
  */
-router.get('/:id', async (req, res) => {
-    try {
-        const trade = await TradeEntry.findById(req.params.id);
-        if (!trade) return res.status(404).json({ message: 'Trade entry not found' });
-        res.status(200).json(trade);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
+router.get('/:id', tradeController.getTradeById);
 
 /**
  * @swagger
@@ -116,15 +81,7 @@ router.get('/:id', async (req, res) => {
  *       400:
  *         description: Validation error
  */
-router.post('/', validateRequest(tradeEntrySchema), async (req, res) => {
-    try {
-        const newTrade = new TradeEntry(req.body);
-        const savedTrade = await newTrade.save();
-        res.status(201).json(savedTrade);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
+router.post('/', validateRequest(tradeEntrySchema), tradeController.createTrade);
 
 /**
  * @swagger
@@ -172,15 +129,7 @@ router.post('/', validateRequest(tradeEntrySchema), async (req, res) => {
  *       404:
  *         description: Trade entry not found
  */
-router.put('/:id', validateRequest(tradeEntrySchema), async (req, res) => {
-    try {
-        const updatedTrade = await TradeEntry.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedTrade) return res.status(404).json({ message: 'Trade entry not found' });
-        res.status(200).json(updatedTrade);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
+router.put('/:id', validateRequest(tradeEntrySchema), tradeController.updateTrade);
 
 /**
  * @swagger
@@ -202,14 +151,6 @@ router.put('/:id', validateRequest(tradeEntrySchema), async (req, res) => {
  *       404:
  *         description: Trade entry not found
  */
-router.delete('/:id', async (req, res) => {
-    try {
-        const deletedTrade = await TradeEntry.findByIdAndDelete(req.params.id);
-        if (!deletedTrade) return res.status(404).json({ message: 'Trade entry not found' });
-        res.status(200).json({ message: 'Trade entry deleted successfully' });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
+router.delete('/:id', tradeController.deleteTrade);
 
 module.exports = router;
