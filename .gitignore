@@ -1,0 +1,51 @@
+# Node.js (Common for both API and Client)
+**/node_modules/
+**/npm-debug.log*
+**/yarn-error.log*
+**/package-lock.json
+**/.env
+**/.env.local
+**/.env.development
+**/.env.production
+**/.env.test
+**/.cache
+
+# API-specific (t-ledger-api)
+t-ledger-api/logs/
+t-ledger-api/*.log
+t-ledger-api/*.log.*
+t-ledger-api/data/
+t-ledger-api/dump/
+t-ledger-api/swagger-output.json
+t-ledger-api/swagger-ui/
+t-ledger-api/dist/
+t-ledger-api/coverage/
+
+# Database files in API
+t-ledger-api/*.sqlite
+t-ledger-api/*.db
+
+# Build and dist outputs
+t-ledger-api/build/
+t-ledger-api/dist/
+t-ledger-client/build/
+t-ledger-client/dist/
+
+# React client-specific (t-ledger-client)
+t-ledger-client/node_modules/
+t-ledger-client/public/static/
+t-ledger-client/coverage/
+
+# IDE and OS-specific files
+**/.DS_Store
+**/*.swp
+**/.idea/
+**/.vscode/
+**/*.iml
+*.local
+*.sublime-workspace
+*.sublime-project
+
+# Deployment and Docker Files
+**/docker-compose.yml
+**/Dockerfile
