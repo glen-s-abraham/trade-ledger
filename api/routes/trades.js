@@ -147,4 +147,43 @@ router.put('/:id', validateRequest(tradeEntrySchema), tradeController.updateTrad
  */
 router.delete('/:id', tradeController.deleteTrade);
 
+
+/**
+ * @swagger
+ * /api/trades/current/holdings:
+ *   get:
+ *     summary: Get current holdings for the authenticated user
+ *     description: Returns a list of the user's current holdings, including total quantity and average purchase price per stock symbol.
+ *     tags:
+ *       - Trades
+ *     security:
+ *       - bearerAuth: []  # Requires a JWT token
+ *     responses:
+ *       200:
+ *         description: List of current holdings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   stockSymbol:
+ *                     type: string
+ *                     description: The stock symbol
+ *                     example: "AAPL"
+ *                   totalQuantity:
+ *                     type: number
+ *                     description: Net quantity of shares held after considering Buy and Sell trades
+ *                     example: 30
+ *                   averagePrice:
+ *                     type: number
+ *                     description: Weighted average purchase price based on Buy trades only
+ *                     example: 145.75
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/current/holdings', tradeController.getCurrentHoldings);
+
 module.exports = router;
