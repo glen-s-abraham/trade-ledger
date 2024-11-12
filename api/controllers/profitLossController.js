@@ -70,3 +70,90 @@ exports.getSymbolWiseProfitLoss = async (req, res) => {
         res.status(500).json({ error: 'Error calculating symbol-wise profit or loss' });
     }
 };
+
+// Get cumulative profit or loss within a specified date range
+exports.getDateFilteredProfitLoss = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { startDate, endDate } = req.query;
+
+        // Build the filter for date range
+        const filter = { user: userId };
+
+        // Apply date range filter if provided
+        if (startDate || endDate) {
+            filter.sellDate = {}; // Only include sellDate if startDate or endDate is provided
+            if (startDate) {
+                filter.sellDate.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                filter.sellDate.$lte = new Date(endDate);
+            }
+        }
+
+        // Aggregate total profit or loss for the specified date range
+        const result = await ProfitLoss.aggregate([
+            { $match: filter },
+            {
+                $group: {
+                    _id: null,
+                    totalProfitOrLoss: { $sum: "$profitOrLoss" }
+                }
+            }
+        ]);
+
+        // Extract total profit or loss or default to 0 if no records
+        const totalProfitOrLoss = result.length > 0 ? result[0].totalProfitOrLoss : 0;
+
+        logger.info(`Calculated profit or loss within date range for user ${userId}`);
+        res.status(200).json({ totalProfitOrLoss });
+    } catch (error) {
+        logger.error('Error calculating profit or loss within date range:', error);
+        res.status(500).json({ error: 'Error calculating profit or loss within date range' });
+    }
+};
+
+exports.getSymbolWiseDateFilteredProfitLoss = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { startDate, endDate } = req.query;
+
+        // Build the filter for date range and user
+        const filter = { user: userId };
+
+        // Apply date range filter if provided
+        if (startDate || endDate) {
+            filter.sellDate = {}; // Only include sellDate if startDate or endDate is provided
+            if (startDate) {
+                filter.sellDate.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                filter.sellDate.$lte = new Date(endDate);
+            }
+        }
+
+        // Aggregate total profit or loss grouped by stock symbol within the specified date range
+        const result = await ProfitLoss.aggregate([
+            { $match: filter },
+            {
+                $group: {
+                    _id: "$stockSymbol",
+                    totalProfitOrLoss: { $sum: "$profitOrLoss" }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    stockSymbol: "$_id",
+                    totalProfitOrLoss: 1
+                }
+            }
+        ]);
+
+        logger.info(`Calculated symbol-wise profit or loss within date range for user ${userId}`);
+        res.status(200).json(result);
+    } catch (error) {
+        logger.error('Error calculating symbol-wise profit or loss within date range:', error);
+        res.status(500).json({ error: 'Error calculating symbol-wise profit or loss within date range' });
+    }
+};
