@@ -157,3 +157,64 @@ exports.getSymbolWiseDateFilteredProfitLoss = async (req, res) => {
         res.status(500).json({ error: 'Error calculating symbol-wise profit or loss within date range' });
     }
 };
+
+// Get historical P&L performance over time (daily, weekly, monthly)
+exports.getHistoricalPerformance = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { interval = 'daily', startDate, endDate } = req.query;
+
+        // Build the filter for date range and user
+        const filter = { user: userId };
+
+        // Apply date range filter if provided
+        if (startDate || endDate) {
+            filter.sellDate = {}; // Only include sellDate if startDate or endDate is provided
+            if (startDate) {
+                filter.sellDate.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                filter.sellDate.$lte = new Date(endDate);
+            }
+        }
+
+        // Define the date format based on the interval
+        let dateFormat;
+        switch (interval) {
+            case 'weekly':
+                dateFormat = { $dateToString: { format: "%Y-%U", date: "$sellDate" } }; // Weekly
+                break;
+            case 'monthly':
+                dateFormat = { $dateToString: { format: "%Y-%m", date: "$sellDate" } }; // Monthly
+                break;
+            case 'daily':
+            default:
+                dateFormat = { $dateToString: { format: "%Y-%m-%d", date: "$sellDate" } }; // Daily
+        }
+
+        // Aggregate total profit or loss grouped by specified interval
+        const result = await ProfitLoss.aggregate([
+            { $match: filter },
+            {
+                $group: {
+                    _id: dateFormat,
+                    totalProfitOrLoss: { $sum: "$profitOrLoss" }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id",
+                    totalProfitOrLoss: 1
+                }
+            },
+            { $sort: { date: 1 } } // Sort by date in ascending order
+        ]);
+
+        logger.info(`Calculated historical P&L performance over ${interval} intervals for user ${userId}`);
+        res.status(200).json(result);
+    } catch (error) {
+        logger.error('Error calculating historical P&L performance:', error);
+        res.status(500).json({ error: 'Error calculating historical P&L performance' });
+    }
+};

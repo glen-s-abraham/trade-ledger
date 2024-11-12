@@ -2,7 +2,7 @@
 const TradeEntry = require('../models/TradeEntry');
 const logger = require('../config/logger');
 const { Schema } = require('mongoose');
-const { getStockPrice } = require('../config/yfinance');
+const { getStockPrice, validateStockSymbol } = require('../config/yfinance');
 
 // Get all trade entries
 exports.getAllTrades = async (req, res) => {
@@ -84,6 +84,11 @@ exports.createTrade = async (req, res) => {
     try {
         const userId = req.user._id;
         const { stockSymbol, transactionType, quantity, price, tradeDate } = req.body;
+
+        const isValidSymbol = await validateStockSymbol(stockSymbol);
+        if (!isValidSymbol) {
+            return res.status(400).json({ error: `Invalid stock symbol: ${stockSymbol}.` });
+        }
 
         // Step 1: Check user's current holdings for the specified stock
         const currentHoldings = await TradeEntry.aggregate([

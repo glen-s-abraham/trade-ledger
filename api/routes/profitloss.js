@@ -150,4 +150,56 @@ router.get('/date-filtered', profitLossController.getDateFilteredProfitLoss);
  */
 router.get('/symbol-summary-date',  profitLossController.getSymbolWiseDateFilteredProfitLoss);
 
+/**
+ * @swagger
+ * /api/profitloss/historical:
+ *   get:
+ *     summary: Get historical P&L performance over time
+ *     description: Returns the profit or loss grouped by time intervals (daily, weekly, monthly) for historical performance analysis.
+ *     tags:
+ *       - ProfitLoss
+ *     security:
+ *       - bearerAuth: []  # Requires a JWT token
+ *     parameters:
+ *       - in: query
+ *         name: interval
+ *         schema:
+ *           type: string
+ *           enum: [daily, weekly, monthly]
+ *           default: daily
+ *         description: The time interval for grouping (daily, weekly, or monthly)
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter P&L entries starting from this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter P&L entries up to this date (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: Historical profit or loss grouped by specified interval
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                     description: The start date of the interval
+ *                   totalProfitOrLoss:
+ *                     type: number
+ *                     description: Total profit or loss for the interval
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/historical', profitLossController.getHistoricalPerformance);
+
 module.exports = router;
