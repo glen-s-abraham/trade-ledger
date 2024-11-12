@@ -11,13 +11,97 @@ const router = express.Router();
  * /api/trades:
  *   get:
  *     summary: Get all trade entries
- *     description: Retrieve a list of all trade entries.
+ *     description: Retrieve a list of all trade entries with optional pagination and filtering by date or symbol.
  *     tags:
  *       - Trades
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination (default is 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of entries per page (default is 10)
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter trades starting from this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter trades ending on this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: symbol
+ *         schema:
+ *           type: string
+ *         description: Filter trades by stock symbol
  *     responses:
  *       200:
  *         description: Successfully retrieved list of trade entries
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: integer
+ *                   description: Total number of trade entries that match the filter
+ *                 page:
+ *                   type: integer
+ *                   description: Current page number
+ *                 limit:
+ *                   type: integer
+ *                   description: Number of entries per page
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Total number of pages based on the filter
+ *                 trades:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         description: Trade ID
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           email:
+ *                             type: string
+ *                             description: User email
+ *                       stockSymbol:
+ *                         type: string
+ *                         description: Stock symbol of the trade
+ *                       transactionType:
+ *                         type: string
+ *                         description: Type of transaction (Buy or Sell)
+ *                       quantity:
+ *                         type: number
+ *                         description: Quantity of shares traded
+ *                       price:
+ *                         type: number
+ *                         description: Price per share
+ *                       tradeDate:
+ *                         type: string
+ *                         format: date
+ *                         description: Date of the trade
+ *                       status:
+ *                         type: string
+ *                         description: Status of the trade (Open or Closed)
+ *       500:
+ *         description: Internal server error
  */
+router.get('/', tradeController.getAllTrades);
+
 router.get('/', tradeController.getAllTrades);
 
 /**

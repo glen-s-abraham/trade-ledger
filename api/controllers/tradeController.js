@@ -7,15 +7,56 @@ const { getStockPrice } = require('../config/yfinance');
 // Get all trade entries
 exports.getAllTrades = async (req, res) => {
     try {
-        const userId = req.user._id;  // Get the logged-in user's ID from req.user
-        const trades = await TradeEntry.find({ user: userId }).populate('user', 'email');  // Populate with user email
-        logger.info('Fetched all trade entries');
-        res.status(200).json(trades);
+        const userId = req.user._id; // Get the logged-in user's ID from req.user
+
+        // Pagination parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Filtering parameters
+        const { startDate, endDate, symbol } = req.query;
+        const filter = { user: userId };
+
+        // Filter by symbol if provided
+        if (symbol) {
+            filter.stockSymbol = symbol;
+        }
+
+        // Filter by date range if provided
+        if (startDate || endDate) {
+            filter.tradeDate = {};
+            if (startDate) {
+                filter.tradeDate.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                filter.tradeDate.$lte = new Date(endDate);
+            }
+        }
+
+        // Query with filters, pagination, and populate user email
+        const trades = await TradeEntry.find(filter)
+            .skip(skip)
+            .limit(limit);
+
+        // Count total documents for pagination metadata
+        const totalTrades = await TradeEntry.countDocuments(filter);
+
+        logger.info('Fetched trade entries with pagination and filtering');
+
+        res.status(200).json({
+            total: totalTrades,
+            page,
+            limit,
+            totalPages: Math.ceil(totalTrades / limit),
+            trades,
+        });
     } catch (error) {
         logger.error('Error fetching trade entries:', error);
         res.status(500).json({ error: 'Error fetching trades' });
     }
 };
+
 
 // Get a trade entry by ID
 exports.getTradeById = async (req, res) => {
