@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const tradeRoutes = require('./routes/trades');
 const authRoutes = require('./routes/auth');
 const profitLossRoutes = require('./routes/profitloss');
+const reportRoutes = require('./routes/reports');
 const setupSwagger = require('./config/swagger');
 const logger = require('./config/logger');
 const passport = require('passport');
@@ -29,6 +30,7 @@ setupSwagger(app);
 // Routes
 app.use('/api/trades', passport.authenticate('jwt', { session: false }), tradeRoutes);
 app.use('/api/profitloss', passport.authenticate('jwt', { session: false }), profitLossRoutes);
+app.use('/api/reports', passport.authenticate('jwt', { session: false }), reportRoutes);
 app.use('/api/auth', authRoutes);
 
 // Error-handling middleware
