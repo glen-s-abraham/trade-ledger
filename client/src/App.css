@@ -1,0 +1,24 @@
+:root {
+  --bs-primary: #1E1E61;
+  /* Dark blue from sidebar */
+  --bs-secondary: #7373C5;
+  /* Lighter blue for accents */
+  --bs-tertiary: #A1A1FF;
+  /* Lightest blue for backgrounds */
+}
+
+.bg-primary {
+  background-color: var(--bs-primary) !important;
+}
+
+.bg-secondary {
+  background-color: var(--bs-secondary) !important;
+}
+
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+.text-secondary {
+  color: var(--bs-secondary) !important;
+}

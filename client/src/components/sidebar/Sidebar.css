@@ -1,0 +1,76 @@
+.sidebar {
+    width: 250px;
+    transition: width 0.3s ease;
+    position: relative;
+    padding-top: 20px;
+    height: 100vh;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+    height: 100%;
+}
+
+/* Sidebar Header */
+
+.sidebar.collapsed {
+    padding: 10px;
+    justify-content: center;
+}
+
+/* Toggle Button */
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+/* Sidebar Title */
+.sidebar-title {
+    font-size: 1.5rem;
+    color: var(--bs-secondary);
+}
+
+/* Sidebar Menu Items */
+.sidebar ul {
+    padding-left: 20px; /* Align menu items with title */
+    margin-top: 20px;
+}
+
+.sidebar ul li {
+    padding: 10px 0;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar ul li:hover {
+    background-color: var(--bs-secondary);
+    border-radius: 5px;
+}
+
+.sidebar ul li i {
+    font-size: 1.2rem;
+    vertical-align: middle;
+}
+
+/* Hide text labels when collapsed */
+.sidebar.collapsed .sidebar-title,
+.sidebar.collapsed ul li span {
+    display: none;
+}
+
+/* Center icons in collapsed state */
+.sidebar.collapsed ul {
+    padding-left: 0;
+}
+
+.sidebar.collapsed ul li {
+    justify-content: center;
+}
