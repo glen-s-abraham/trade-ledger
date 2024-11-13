@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import TotalPnLWidget from './widgets/TotalPnLWidget';
 import PercentageChangeWidget from './widgets/PercentageChangeWidget';
 import HoldingsTable from './widgets/HoldingsTable';
+import InvestedValueWidget from './widgets/InvestedValueWidget.js';
 
 
 function Dashboard() {
     const [holdings, setHoldings] = useState([]);
     const [percentageChange, setPercentageChange] = useState({});
     const [totalPnL, setTotalPnL] = useState({});
+    const [totalInvested, setTotalInvested] = useState({});
 
     useEffect(() => {
         setHoldings([
@@ -26,6 +28,8 @@ function Dashboard() {
         });
 
         setTotalPnL({ totalPnL: -10000 });
+
+        setTotalInvested({ totalInvested: 5000 });
     }, []);
 
     return (
@@ -33,10 +37,13 @@ function Dashboard() {
             <h2>Dashboard</h2>
             {/* Top Row (30% of the height) */}
             <div className="row mt-4 d-flex align-items-stretch">
-                <div className="col-lg-6 col-md-12 mb-4 d-flex">
+                <div className="col-lg-4 col-md-12 mb-4 d-flex">
+                    <InvestedValueWidget totalInvested={totalInvested.totalInvested} />
+                </div>
+                <div className="col-lg-4 col-md-12 mb-4 d-flex">
                     <TotalPnLWidget totalPnL={totalPnL.totalPnL} />
                 </div>
-                <div className="col-lg-6 col-md-12 mb-4 d-flex">
+                <div className="col-lg-4 col-md-12 mb-4 d-flex">
                     <PercentageChangeWidget data={percentageChange} />
                 </div>
             </div>
