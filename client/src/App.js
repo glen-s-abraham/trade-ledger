@@ -5,6 +5,7 @@ import './App.css';
 import Sidebar from './components/sidebar/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
 import Trades from './components/trades/Trades';
+import HistoricalData from './components/historicalData/HistoricalData';
 
 function App() {
   return (
@@ -12,7 +13,8 @@ function App() {
       <Sidebar />
       <div className="flex-grow-1">
         {/* <Dashboard /> */}
-        <Trades/>
+        {/* <Trades/> */}
+        <HistoricalData />
       </div>
     </div>
   );

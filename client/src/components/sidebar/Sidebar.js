@@ -21,10 +21,6 @@ function Sidebar() {
             {/* Sidebar Menu Items */}
             <ul className="list-unstyled mt-4 flex-grow-1">
                 <li className="mb-3">
-                    <i className="bi bi-plus-circle-fill me-2"></i>
-                    <span className={isCollapsed ? 'd-none' : ''}>Add Trade</span>
-                </li>
-                <li className="mb-3">
                     <i className="bi bi-speedometer2 me-2"></i>
                     <span className={isCollapsed ? 'd-none' : ''}>Dashboard</span>
                 </li>
@@ -36,10 +32,10 @@ function Sidebar() {
                     <i className="bi bi-bar-chart-fill me-2"></i>
                     <span className={isCollapsed ? 'd-none' : ''}>Reports</span>
                 </li>
-                <li className="mb-3">
+                {/* <li className="mb-3">
                     <i className="bi bi-lightbulb-fill me-2"></i>
                     <span className={isCollapsed ? 'd-none' : ''}>Insights</span>
-                </li>
+                </li> */}
                 <li className="mb-3">
                     <i className="bi bi-clock-history me-2"></i>
                     <span className={isCollapsed ? 'd-none' : ''}>Historical Data</span>
