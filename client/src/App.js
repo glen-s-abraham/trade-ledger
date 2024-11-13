@@ -4,13 +4,15 @@ import '../node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import './App.css';
 import Sidebar from './components/sidebar/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
+import Trades from './components/trades/Trades';
 
 function App() {
   return (
     <div className="d-flex">
       <Sidebar />
       <div className="flex-grow-1">
-        <Dashboard />
+        {/* <Dashboard /> */}
+        <Trades/>
       </div>
     </div>
   );

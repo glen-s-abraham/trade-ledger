@@ -32,8 +32,8 @@ function PercentageChangeWidget({ data }) {
     return (
         <div className="card p-3 text-center" style={{ width: '100%', height: '100%' }}>
             <h4>Current Change</h4>
-            <p className="display-4 text-primary">{data.percentageChange}%</p>
-            <div style={{ height: '150px' }}>
+            <p className="display-6 text-primary">{data.percentageChange}%</p>
+            <div style={{ height: '70%' }}>
                 <Doughnut data={chartData} options={options} />
             </div>
         </div>

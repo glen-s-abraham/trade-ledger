@@ -1,10 +1,22 @@
 :root {
-  --bs-primary: #1E1E61;
-  /* Dark blue from sidebar */
-  --bs-secondary: #7373C5;
-  /* Lighter blue for accents */
-  --bs-tertiary: #A1A1FF;
-  /* Lightest blue for backgrounds */
+  --bs-primary: #1E1E61; /* Dark blue for primary */
+  --bs-secondary: #7373C5; /* Light blue for secondary */
+  --bs-tertiary: #A1A1FF; /* Lightest blue for backgrounds */
+
+  /* Button specific color variables */
+  --bs-btn-primary-bg: var(--bs-primary);
+  --bs-btn-primary-border: var(--bs-primary);
+  --bs-btn-primary-color: #ffffff;
+  --bs-btn-primary-hover-bg: #14143F;
+  --bs-btn-primary-hover-border: #14143F;
+  --bs-btn-primary-active-bg: #0E0E2A;
+  --bs-btn-primary-active-border: #0E0E2A;
+
+  /* Secondary button colors */
+  --bs-btn-secondary-bg: var(--bs-secondary);
+  --bs-btn-secondary-border: var(--bs-secondary);
+  --bs-btn-secondary-hover-bg: #6060B8;
+  --bs-btn-secondary-hover-border: #6060B8;
 }
 
 .bg-primary {
@@ -21,4 +33,53 @@
 
 .text-secondary {
   color: var(--bs-secondary) !important;
+}
+
+/* Primary Button Styling */
+.btn-primary {
+  background-color: var(--bs-btn-primary-bg) !important;
+  border-color: var(--bs-btn-primary-border) !important;
+  color: var(--bs-btn-primary-color) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--bs-btn-primary-hover-bg) !important;
+  border-color: var(--bs-btn-primary-hover-border) !important;
+}
+
+.btn-primary:active,
+.btn-primary:focus {
+  background-color: var(--bs-btn-primary-active-bg) !important;
+  border-color: var(--bs-btn-primary-active-border) !important;
+  box-shadow: 0 0 0 0.2rem rgba(30, 30, 97, 0.25);
+}
+
+/* Secondary Button Styling */
+.btn-secondary {
+  background-color: var(--bs-btn-secondary-bg) !important;
+  border-color: var(--bs-btn-secondary-border) !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary:hover {
+  background-color: var(--bs-btn-secondary-hover-bg) !important;
+  border-color: var(--bs-btn-secondary-hover-border) !important;
+}
+
+.form-container {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--bs-tertiary);
+}
+
+.form-container .form-control,
+.form-container .btn {
+  margin-top: 0.5rem;
+}
+
+.table-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: #f8f9fa; /* Light gray for contrast */
 }
