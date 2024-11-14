@@ -37,7 +37,8 @@
 
 /* Sidebar Menu Items */
 .sidebar ul {
-    padding-left: 20px; /* Align menu items with title */
+    padding-left: 20px;
+    /* Align menu items with title */
     margin-top: 20px;
 }
 
@@ -51,6 +52,11 @@
 }
 
 .sidebar ul li:hover {
+    background-color: var(--bs-secondary);
+    border-radius: 5px;
+}
+
+.sidebar .active {
     background-color: var(--bs-secondary);
     border-radius: 5px;
 }
