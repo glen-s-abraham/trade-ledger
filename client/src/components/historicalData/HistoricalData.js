@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import axiosInstance from '../../utils/axiosConfig';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
-import { format } from 'date-fns';
 
 function HistoricalData() {
     const [timeFrame, setTimeFrame] = useState('monthly');
@@ -9,37 +9,25 @@ function HistoricalData() {
     const [endDate, setEndDate] = useState('');
     const [data, setData] = useState([]);
 
-    // Dummy data based on time frame
-    const dummyData = {
-        monthly: [
-            { totalProfitOrLoss: 1888.05, date: '2023-07' },
-            { totalProfitOrLoss: 1889.40, date: '2023-08' },
-            { totalProfitOrLoss: 6020.12, date: '2023-10' },
-        ],
-        weekly: [
-            { totalProfitOrLoss: 1249.85, date: '2023-27' },
-            { totalProfitOrLoss: -10.12, date: '2023-28' },
-            { totalProfitOrLoss: 648.32, date: '2023-30' },
-            { totalProfitOrLoss: 586.80, date: '2023-31' },
-            { totalProfitOrLoss: 1302.60, date: '2023-35' },
-            { totalProfitOrLoss: 6020.12, date: '2023-40' },
-        ],
-        daily: [
-            { totalProfitOrLoss: 570.00, date: '2023-07-02' },
-            { totalProfitOrLoss: 420.00, date: '2023-07-04' },
-            { totalProfitOrLoss: 260.00, date: '2023-07-06' },
-            { totalProfitOrLoss: -10.12, date: '2023-07-12' },
-            { totalProfitOrLoss: 648.32, date: '2023-07-28' },
-            { totalProfitOrLoss: 586.80, date: '2023-08-02' },
-            { totalProfitOrLoss: 1302.60, date: '2023-08-29' },
-            { totalProfitOrLoss: 6020.12, date: '2023-10-02' },
-        ]
+    // Fetch historical data based on filters
+    const fetchHistoricalData = async () => {
+        try {
+            const response = await axiosInstance.get('/api/profitloss/historical', {
+                params: {
+                    interval: timeFrame,
+                    startDate: startDate || undefined,
+                    endDate: endDate || undefined,
+                },
+            });
+            setData(response.data);
+        } catch (error) {
+            console.error('Error fetching historical data:', error);
+        }
     };
 
-    // Update data based on time frame
     useEffect(() => {
-        setData(dummyData[timeFrame]);
-    }, [timeFrame]);
+        fetchHistoricalData(); // Fetch data on initial load or whenever filters change
+    }, [timeFrame, startDate, endDate]);
 
     // Generate chart data for the line graph
     const chartData = {
@@ -49,8 +37,8 @@ function HistoricalData() {
                 label: 'Total Profit/Loss',
                 data: data.map(item => item.totalProfitOrLoss),
                 fill: false,
-                borderColor: 'rgba(30,30,97,1)', // primary color
-                backgroundColor: 'rgba(115,115,197,0.5)', // secondary color
+                borderColor: 'rgba(30,30,97,1)',
+                backgroundColor: 'rgba(115,115,197,0.5)',
                 tension: 0.1,
                 pointBackgroundColor: 'rgba(30,30,97,1)',
                 pointHoverBackgroundColor: 'rgba(115,115,197,1)',
@@ -98,17 +86,17 @@ function HistoricalData() {
         }
     };
 
-    const handleTimeFrameChange = (e) => setTimeFrame(e.target.value);
-    const handleStartDateChange = (e) => setStartDate(e.target.value);
-    const handleEndDateChange = (e) => setEndDate(e.target.value);
-
     return (
         <div className="historical-data-section p-4">
             <h2>Historical Data</h2>
             <div className="row mb-3">
                 <div className="col-md-3">
                     <label className="form-label">Time Frame</label>
-                    <select className="form-select" value={timeFrame} onChange={handleTimeFrameChange}>
+                    <select
+                        className="form-select"
+                        value={timeFrame}
+                        onChange={(e) => setTimeFrame(e.target.value)}
+                    >
                         <option value="daily">Daily</option>
                         <option value="weekly">Weekly</option>
                         <option value="monthly">Monthly</option>
@@ -120,7 +108,7 @@ function HistoricalData() {
                         type="date"
                         className="form-control"
                         value={startDate}
-                        onChange={handleStartDateChange}
+                        onChange={(e) => setStartDate(e.target.value)}
                     />
                 </div>
                 <div className="col-md-3">
@@ -129,11 +117,14 @@ function HistoricalData() {
                         type="date"
                         className="form-control"
                         value={endDate}
-                        onChange={handleEndDateChange}
+                        onChange={(e) => setEndDate(e.target.value)}
                     />
                 </div>
                 <div className="col-md-3 d-flex align-items-end">
-                    <button className="btn btn-primary w-100">
+                    <button
+                        className="btn btn-primary w-100"
+                        onClick={fetchHistoricalData}
+                    >
                         <i className="bi bi-filter"></i> Apply Filters
                     </button>
                 </div>

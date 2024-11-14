@@ -8,7 +8,7 @@ function Reports() {
 
     const handleGenerateReport = async () => {
         try {
-            const response = await axiosInstance.get('/api/reports/csv', {
+            const response = await axiosInstance.get('/api/reports/csv', { // Ensure the endpoint generates Excel format
                 params: {
                     reportType, // e.g., 'cumulative-pnl'
                     startDate,  // e.g., '2023-01-01'
@@ -17,11 +17,11 @@ function Reports() {
                 responseType: 'blob', // Important for downloading files
             });
 
-            // Create a link element to download the CSV file
+            // Create a link element to download the Excel file
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `report_${reportType}.csv`);
+            link.setAttribute('download', `report_${reportType}.xlsx`); // Set extension to .xlsx for Excel
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -36,7 +36,7 @@ function Reports() {
             <h2 className="mb-4">Reports</h2>
             <div className="card shadow-sm p-4 mb-4" style={{ minHeight: '250px' }}>
                 <p className="text-muted mb-4">
-                    Generate CSV reports for cumulative P&L, symbol-wise P&L, and trade history, filtered by date.
+                    Generate Excel reports for cumulative P&L, symbol-wise P&L, and trade history, filtered by date.
                 </p>
                 <div className="row g-3 mb-4 align-items-end">
                     <div className="col-md-4">
@@ -83,7 +83,6 @@ function Reports() {
                     </div>
                 </div>
             </div>
-
         </div>
     );
 }
