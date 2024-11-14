@@ -1,35 +1,55 @@
 import React, { useState, useEffect } from 'react';
+import axiosInstance from '../../utils/axiosConfig';
 import TotalPnLWidget from './widgets/TotalPnLWidget';
 import PercentageChangeWidget from './widgets/PercentageChangeWidget';
 import HoldingsTable from './widgets/HoldingsTable';
 import InvestedValueWidget from './widgets/InvestedValueWidget.js';
 
-
 function Dashboard() {
     const [holdings, setHoldings] = useState([]);
-    const [percentageChange, setPercentageChange] = useState({});
-    const [totalPnL, setTotalPnL] = useState({});
-    const [totalInvested, setTotalInvested] = useState({});
+    const [percentageChange, setPercentageChange] = useState({ percentageChange: 0 });
+    const [totalPnL, setTotalPnL] = useState({ totalPnL: 0 });
+    const [totalInvested, setTotalInvested] = useState({ totalInvested: 0 });
 
+    // Fetch Holdings data
     useEffect(() => {
-        setHoldings([
-            { totalQuantity: 2, stockSymbol: "prestige.ns", averagePrice: 571.5 },
-            { totalQuantity: 2, stockSymbol: "FEDERALBNK.NS", averagePrice: 127.2 },
-            { totalQuantity: 4, stockSymbol: "zomato.ns", averagePrice: 85.24 },
-            { totalQuantity: 2, stockSymbol: "petronet.ns", averagePrice: 231.33 },
-            { totalQuantity: 3, stockSymbol: "coalindia.ns", averagePrice: 230.7 },
-            { totalQuantity: 1, stockSymbol: "infy.ns", averagePrice: 1330 },
-        ]);
+        const fetchHoldings = async () => {
+            try {
+                const response = await axiosInstance.get('/api/trades/current/holdings');
+                setHoldings(response.data);
+            } catch (error) {
+                console.error('Error fetching holdings:', error);
+            }
+        };
+        fetchHoldings();
+    }, []);
 
-        setPercentageChange({
-            totalInvestedAmount: 5000,
-            currentMarketValue: 10000,
-            percentageChange: 100
-        });
+    // Fetch Percentage Change and Invested Amount data
+    useEffect(() => {
+        const fetchPercentageChange = async () => {
+            try {
+                const response = await axiosInstance.get('/api/trades/current/total-percentage-change');
+                setPercentageChange(response.data);
+                const { totalInvestedAmount } = response.data;
+                setTotalInvested({ totalInvested: totalInvestedAmount });
+            } catch (error) {
+                console.error('Error fetching percentage change data:', error);
+            }
+        };
+        fetchPercentageChange();
+    }, []);
 
-        setTotalPnL({ totalPnL: -10000 });
-
-        setTotalInvested({ totalInvested: 5000 });
+    // Fetch Total PnL data
+    useEffect(() => {
+        const fetchTotalPnL = async () => {
+            try {
+                const response = await axiosInstance.get('/api/trades/current/total-pnl');
+                setTotalPnL({ totalPnL: response.data.totalPnL });
+            } catch (error) {
+                console.error('Error fetching total PnL data:', error);
+            }
+        };
+        fetchTotalPnL();
     }, []);
 
     return (
@@ -59,4 +79,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-

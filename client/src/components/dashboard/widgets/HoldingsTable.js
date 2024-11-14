@@ -1,6 +1,7 @@
 import React from 'react';
 
 function HoldingsTable({ holdings }) {
+    console.log(holdings)
     return (
         <div className="card p-3" style={{ width: '100%', height: '100%' }}>
             <h4>Current Holdings</h4>

@@ -9,11 +9,15 @@ const axiosInstance = axios.create({
     },
 });
 
-// Add a request interceptor
+// Add a request interceptor to include the authorization token
 axiosInstance.interceptors.request.use(
     (config) => {
-        // You can add authorization headers here if needed
-        // config.headers['Authorization'] = `Bearer ${token}`;
+        // Get the token from localStorage or any secure storage
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // Set the Authorization header
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
         return config;
     },
     (error) => {
@@ -30,6 +34,9 @@ axiosInstance.interceptors.response.use(
         if (error.response && error.response.status === 401) {
             // Optionally handle logout or token refresh here
             console.log("Unauthorized, redirecting to login...");
+            // You may want to clear the token and redirect the user to login
+            localStorage.removeItem('authToken');
+            window.location.href = '/login'; // Redirect to login page
         }
         // Handle errors globally
         console.error('API error:', error.response || error.message);
