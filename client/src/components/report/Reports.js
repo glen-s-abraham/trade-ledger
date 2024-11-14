@@ -1,12 +1,34 @@
 import React, { useState } from 'react';
+import axiosInstance from '../../utils/axiosConfig';
 
 function Reports() {
     const [reportType, setReportType] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
-    const handleGenerateReport = () => {
-        // Fetching and downloading logic here
+    const handleGenerateReport = async () => {
+        try {
+            const response = await axiosInstance.get('/api/reports/csv', {
+                params: {
+                    reportType, // e.g., 'cumulative-pnl'
+                    startDate,  // e.g., '2023-01-01'
+                    endDate     // e.g., '2023-12-31'
+                },
+                responseType: 'blob', // Important for downloading files
+            });
+
+            // Create a link element to download the CSV file
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `report_${reportType}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        } catch (error) {
+            console.error('Error generating report:', error);
+        }
     };
 
     return (
@@ -61,7 +83,7 @@ function Reports() {
                     </div>
                 </div>
             </div>
-           
+
         </div>
     );
 }
