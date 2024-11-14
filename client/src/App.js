@@ -6,15 +6,17 @@ import Sidebar from './components/sidebar/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
 import Trades from './components/trades/Trades';
 import HistoricalData from './components/historicalData/HistoricalData';
+import Reports from './components/report/Reports';
 
 function App() {
   return (
     <div className="d-flex">
       <Sidebar />
       <div className="flex-grow-1">
-        {/* <Dashboard /> */}
-        {/* <Trades/> */}
-        <HistoricalData />
+        {/* <Dashboard />
+        <Trades/>
+        <HistoricalData /> */}
+        <Reports/>
       </div>
     </div>
   );
