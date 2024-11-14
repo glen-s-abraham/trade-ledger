@@ -8,6 +8,7 @@ function TradeForm({ trade, onSubmit, mode, onCancel }) {
         price: '',
         tradeDate: '',
     });
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (trade) {
@@ -19,13 +20,7 @@ function TradeForm({ trade, onSubmit, mode, onCancel }) {
                 tradeDate: trade.tradeDate.slice(0, 10),
             });
         } else {
-            setFormData({
-                stockSymbol: '',
-                transactionType: 'Buy',
-                quantity: '',
-                price: '',
-                tradeDate: '',
-            });
+            resetForm();
         }
     }, [trade]);
 
@@ -36,12 +31,33 @@ function TradeForm({ trade, onSubmit, mode, onCancel }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        // Basic validation
+        if (!formData.stockSymbol || !formData.quantity || !formData.price || !formData.tradeDate) {
+            setError('Please fill in all required fields.');
+            return;
+        }
+        
         onSubmit(formData);
+        resetForm(); // Clear the form after successful submission if in 'create' mode
+        setError(''); // Reset any errors
+    };
+
+    const resetForm = () => {
+        setFormData({
+            stockSymbol: '',
+            transactionType: 'Buy',
+            quantity: '',
+            price: '',
+            tradeDate: '',
+        });
     };
 
     return (
         <form onSubmit={handleSubmit} className="p-2 border rounded bg-light mb-3">
             <div className="row g-2">
+                {error && <div className="col-12 text-danger mb-2">{error}</div>}
+                
                 <div className="col-md-3">
                     <label htmlFor="stockSymbol" className="form-label">Stock Symbol</label>
                     <input
@@ -51,6 +67,7 @@ function TradeForm({ trade, onSubmit, mode, onCancel }) {
                         className="form-control form-control-sm"
                         value={formData.stockSymbol}
                         onChange={handleChange}
+                        required
                     />
                 </div>
                 <div className="col-md-3">
@@ -75,6 +92,7 @@ function TradeForm({ trade, onSubmit, mode, onCancel }) {
                         className="form-control form-control-sm"
                         value={formData.quantity}
                         onChange={handleChange}
+                        required
                     />
                 </div>
                 <div className="col-md-2">
@@ -86,6 +104,7 @@ function TradeForm({ trade, onSubmit, mode, onCancel }) {
                         className="form-control form-control-sm"
                         value={formData.price}
                         onChange={handleChange}
+                        required
                     />
                 </div>
                 <div className="col-md-2">
@@ -97,6 +116,7 @@ function TradeForm({ trade, onSubmit, mode, onCancel }) {
                         className="form-control form-control-sm"
                         value={formData.tradeDate}
                         onChange={handleChange}
+                        required
                     />
                 </div>
                 <div className="col-md-2 d-flex align-items-end">
@@ -110,7 +130,6 @@ function TradeForm({ trade, onSubmit, mode, onCancel }) {
                         </button>
                     )}
                 </div>
-
             </div>
         </form>
     );

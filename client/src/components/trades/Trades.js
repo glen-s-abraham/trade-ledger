@@ -1,133 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../../utils/axiosConfig';
 import TradeForm from './subComponents/TradeForm';
 import TradeTable from './subComponents/TradeTable';
 
 function Trades() {
-    const dummyTrades = [
-        {
-            "_id": "67331ce3bfa2a3c315d248c1",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "infy.ns",
-            "transactionType": "Buy",
-            "quantity": 2,
-            "price": 1330,
-            "tradeDate": "2023-07-03T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        },
-        {
-            "_id": "67331d83bfa2a3c315d248c5",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "infy.ns",
-            "transactionType": "Sell",
-            "quantity": 2,
-            "price": 1453.85,
-            "tradeDate": "2023-07-04T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        },
-        {
-            "_id": "67331f30bfa2a3c315d248dd",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "gail.ns",
-            "transactionType": "Buy",
-            "quantity": 23,
-            "price": 106.2,
-            "tradeDate": "2023-07-04T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        },
-        {
-            "_id": "67331f57bfa2a3c315d248e2",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "gail.ns",
-            "transactionType": "Sell",
-            "quantity": 23,
-            "price": 117.5,
-            "tradeDate": "2023-07-06T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        },
-        {
-            "_id": "67331fdabfa2a3c315d248ef",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "suzlon.ns",
-            "transactionType": "Buy",
-            "quantity": 65,
-            "price": 15.75,
-            "tradeDate": "2023-07-03T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        },
-        {
-            "_id": "67331ff3bfa2a3c315d248f3",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "suzlon.ns",
-            "transactionType": "Sell",
-            "quantity": 65,
-            "price": 18.4,
-            "tradeDate": "2023-07-04T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        },
-        {
-            "_id": "67332031bfa2a3c315d248fa",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "petronet.ns",
-            "transactionType": "Buy",
-            "quantity": 4,
-            "price": 231.33,
-            "tradeDate": "2023-07-11T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        },
-        {
-            "_id": "6733204abfa2a3c315d248fe",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "petronet.ns",
-            "transactionType": "Sell",
-            "quantity": 4,
-            "price": 228.8,
-            "tradeDate": "2023-07-12T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        },
-        {
-            "_id": "6733216cbfa2a3c315d24910",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "prestige.ns",
-            "transactionType": "Buy",
-            "quantity": 12,
-            "price": 571.5,
-            "tradeDate": "2023-08-29T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        },
-        {
-            "_id": "67332185bfa2a3c315d24914",
-            "user": "67331c75bfa2a3c315d248b9",
-            "stockSymbol": "prestige.ns",
-            "transactionType": "Sell",
-            "quantity": 12,
-            "price": 680.05,
-            "tradeDate": "2023-08-29T00:00:00.000Z",
-            "status": "Open",
-            "__v": 0
-        }
-    ];
-
-    const [trades, setTrades] = useState(dummyTrades);
+    const [trades, setTrades] = useState([]);
+    const [page, setPage] = useState(1);
+    const [limit] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [symbol, setSymbol] = useState('');
     const [selectedTrade, setSelectedTrade] = useState(null);
     const [mode, setMode] = useState('create');
 
-    const handleFormSubmit = (trade) => {
-        if (mode === 'create') {
-            const newTrade = { ...trade, _id: (trades.length + 1).toString(), status: "Open" };
-            setTrades([...trades, newTrade]);
-        } else {
-            setTrades(trades.map(t => (t._id === selectedTrade._id ? trade : t)));
-            setMode('create');
-            setSelectedTrade(null);
+    // Fetch trades with pagination and filters
+    const fetchTrades = async () => {
+        try {
+            const params = {
+                page,
+                limit,
+                startDate: startDate || undefined,
+                endDate: endDate || undefined,
+                symbol: symbol || undefined,
+            };
+            const response = await axiosInstance.get('/api/trades', { params });
+            setTrades(response.data.trades);
+            setTotalPages(response.data.totalPages);
+        } catch (error) {
+            console.error('Error fetching trades:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchTrades();
+    }, [page, startDate, endDate, symbol]);
+
+    const handleFormSubmit = async (trade) => {
+        try {
+            if (mode === 'create') {
+                await axiosInstance.post('/api/trades', trade);
+            } else {
+                await axiosInstance.put(`/api/trades/${selectedTrade._id}`, trade);
+                setMode('create');
+                setSelectedTrade(null);
+            }
+            fetchTrades(); // Refresh data after create/update
+        } catch (error) {
+            console.error('Error submitting trade:', error);
         }
     };
 
@@ -136,13 +56,30 @@ function Trades() {
         setMode('update');
     };
 
-    const handleDelete = (id) => {
-        setTrades(trades.filter(trade => trade._id !== id));
+    const handleDelete = async (id) => {
+        try {
+            await axiosInstance.delete(`/api/trades/${id}`);
+            fetchTrades(); // Refresh data after delete
+        } catch (error) {
+            console.error('Error deleting trade:', error);
+        }
     };
 
     const handleCancel = () => {
         setSelectedTrade(null);
         setMode('create');
+    };
+
+    const handleFilterSubmit = (e) => {
+        e.preventDefault();
+        setPage(1);
+        fetchTrades();
+    };
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setPage(newPage);
+        }
     };
 
     return (
@@ -154,11 +91,69 @@ function Trades() {
                 mode={mode}
                 onCancel={handleCancel}
             />
-            <TradeTable
-                trades={trades}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-            />
+            
+            {/* Filter Form */}
+            <div className="card p-3 mt-5">
+                <form className="row mb-3" onSubmit={handleFilterSubmit}>
+                    <div className="col-md-3">
+                        <label className="form-label">Start Date</label>
+                        <input
+                            type="date"
+                            className="form-control form-control-sm"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                        />
+                    </div>
+                    <div className="col-md-3">
+                        <label className="form-label">End Date</label>
+                        <input
+                            type="date"
+                            className="form-control form-control-sm"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                        />
+                    </div>
+                    <div className="col-md-3">
+                        <label className="form-label">Symbol</label>
+                        <input
+                            type="text"
+                            className="form-control form-control-sm"
+                            placeholder="Stock Symbol"
+                            value={symbol}
+                            onChange={(e) => setSymbol(e.target.value)}
+                        />
+                    </div>
+                    <div className="col-md-3 d-flex align-items-end">
+                        <button type="submit" className="btn btn-primary btn-sm w-100">Apply Filters</button>
+                    </div>
+                </form>
+
+                {/* Trade Table */}
+                <TradeTable
+                    trades={trades}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                />
+
+                {/* Pagination Controls */}
+                <div className="d-flex justify-content-between mt-3">
+                    <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => handlePageChange(page - 1)}
+                        disabled={page === 1}
+                    >
+                        Previous
+                    </button>
+                    <span>Page {page} of {totalPages}</span>
+                    <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => handlePageChange(page + 1)}
+                        disabled={page === totalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

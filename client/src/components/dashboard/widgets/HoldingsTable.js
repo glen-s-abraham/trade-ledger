@@ -12,7 +12,7 @@ function HoldingsTable({ holdings }) {
                             <th>Stock Symbol</th>
                             <th>Total Quantity</th>
                             <th>Average Price</th>
-                            <th>Current Value</th>
+                            <th>Total Invested</th>
                         </tr>
                     </thead>
                     <tbody>
